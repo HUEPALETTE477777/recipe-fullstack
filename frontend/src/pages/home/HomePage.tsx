@@ -49,7 +49,7 @@ export default function HomePage() {
                 
                 {/* RECIPES GRID 3 COLUMNS */}
                 <div className="grid gap-6 grid-cols-3 mb-12">
-                    {currentItems.map((recipe : Recipe) => (
+                    {(currentItems || []).map((recipe : Recipe) => (
                         <div key={recipe.id} className="bg-white text-gray-800 p-10 shadow-sm border rounded-lg border-gray-200 hover:shadow-md transition-shadow flex flex-col">
                             <div>
                                 <div className="flex items-center gap-3 mb-4">

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createRecipe, getAllRecipes, getRecipe, getMyRecipes } from '../controllers/RecipeController.js';
+import { createRecipe, getAllRecipes, getRecipe, getMyRecipes, deleteRecipe } from '../controllers/RecipeController.js';
 import { authenticate, authorize } from '../middleware/Auth';
 
 const router = Router();
@@ -12,7 +12,8 @@ router.get('/:id', getRecipe)
 // ONLY FOR LOGGED IN USERS
 router.post('/create-recipe', authenticate, createRecipe);
 
-// ADMIN ONLY
+// DELETING FOR ADMIN OR OWNER OF RECIPE
 // router.delete('/:id', authenticate, authorize('admin'), deleteRecipe);
+router.delete('/:id', authenticate, deleteRecipe);
 
 export default router;

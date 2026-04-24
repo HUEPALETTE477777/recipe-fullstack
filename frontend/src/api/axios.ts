@@ -5,12 +5,8 @@ import axios from 'axios';
 import { supabase } from '../lib/SupabaseClient';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-    },
-    withCredentials: true
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+    withCredentials: true,
 });
 
 // REQUEST INTERCEPTOR
@@ -29,13 +25,26 @@ api.interceptors.request.use(async (config) => {
 });
 
 // RESPONSE INTERCEPTOR
-// AUTOMATE CLEAN UP 
-api.interceptors.response.use((response) => { return response },
+// GO STRIAGHT THROUGH IF OUR REQUEST IS SUCCESSFUL
+api.interceptors.response.use(
+    (response) => {
+        return response
+    },
     async (error) => {
+        // CHECK IF WE ARE UNAUTHORIZED
         if (error.response?.status === 401) {
-            console.warn("SESSION EXPIRED OR INVALID. LOGGING YOU OUT");
+            alert("SESSION EXPIRED OR INVALID. LOGGING YOU OUT");
+
             await supabase.auth.signOut();
-            window.location.href = '/login';
+            localStorage.removeItem('sb-access-token');
+
+            if (window.location.pathname !== '/login') {
+                window.location.href = '/login';
+            }
+        }
+
+        if (error.response?.status === 403) {
+            alert("ACCESS DENIED: NO PERMISSION TO MODIFY THIS RESOURCe");
         }
 
         return Promise.reject(error);

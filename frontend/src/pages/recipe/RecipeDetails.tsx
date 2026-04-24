@@ -12,19 +12,11 @@ export default function RecipeDetails() {
     );
 
     if (loading) {
-        return (
-            <div>
-                Loading...
-            </div>
-        );
+        return <div> Loading... </div>;
     }
 
     if (!recipe) {
-        return (
-            <div>
-                Recipe not found!
-            </div>
-        );
+        return <div>Recipe not found!</div>
     }
 
     return (

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 
-
 // SEXY CUSTOM HOOK, GENERIC TYPE + DEPENDENCY
 // PERFECT FOR PAGE LOAD FETCHING OR SESSION FETCHING
 export function useApi<T>(apiFunc: () => Promise<T>, dependencies: any[] = []) {
@@ -17,6 +16,7 @@ export function useApi<T>(apiFunc: () => Promise<T>, dependencies: any[] = []) {
             try {
                 setLoading(true);
                 const result = await apiFunc();
+                console.log("API RESULT:", result);
                 if (isMounted) {
                     setData(result);
                 }
@@ -35,5 +35,13 @@ export function useApi<T>(apiFunc: () => Promise<T>, dependencies: any[] = []) {
         return () => { isMounted = false }; 
     }, dependencies);
 
-    return { data, loading, error, setData };
+    // USED BY DELETION, MIDDLEGROUND REFACOTR RATHER THAN HAVING AN ENTIRE CONTEXT/REDUX
+    // IT IS A WRAPPER FOR 'setData', WHICH WILL UPDATE THE UI AS IT IS 'useState'
+    const removeListItem = (id: string | number) => {
+        if (Array.isArray(data)) {
+            setData(data.filter(item => item.id !== id) as unknown as T);
+        }
+    };
+
+    return { data, loading, error, setData, removeListItem };
 }

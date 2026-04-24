@@ -1,41 +1,60 @@
-import { useAuth } from "../../hooks/useAuth";
-import { Link } from "react-router-dom";
-import { RecipeService } from "../../services/RecipeService.tsx";
-import { useApi } from "../../hooks/useApi.ts";
-import { type Recipe } from "../../types/RecipeTypes.ts";
+import { RecipeService } from "../../services/RecipeService";
+import { useApi } from "../../hooks/useApi";
+import { type Recipe } from "../../types/RecipeTypes";
 
+// 'useApi' DOES THE INITIAL FETCH, RENAME DATA TO RECIPES
 export default function MyRecipes() {
-    const { session } = useAuth();
-    const { data: recipes, loading } = useApi(() => RecipeService.getMyRecipes(), [session]);
+    const { data: recipes, loading, removeListItem } = useApi<Recipe[]>(
+        () => RecipeService.getMyRecipes(), 
+        []
+    );
+
+    const handleDelete = async (id: string) => {
+        if (!window.confirm("Delete this?")) {
+            return;
+        }
+
+        try {
+            await RecipeService.deleteRecipeById(id);
+            removeListItem(id);
+        } catch (err) {
+            alert("Delete failed");
+        }
+    };
+
+    if (loading) {
+        return <div>Loading phonk...</div>;
+    }
 
     return (
-        <div className="p-8 bg-gray-100 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-gray-800">My Recipes</h1>
-
-            {!session && <p className="text-red-500">LOGIN TO SEE YOUR RECIPES UNC</p>}
-
-            {loading ? (
-                <p>Loading...</p>
-            ) : (
-                <div className="grid grid-cols-4 gap-6">
-                    {recipes.map((recipe : Recipe) => (
-                        <div key={recipe.id} className="bg-white p-6 shadow-sm border border-gray-200">
-                            <h2 className="text-xl font-bold text-gray-800">{recipe.title}</h2>
-                            <p className="text-gray-500 text-sm mt-3">
-                                Created on {new Date(recipe.created_at).toLocaleDateString()}
-                                <Link to={`/recipe/${recipe.id}`} className="bg-gray-800 text-white mt-4 hover:cursor-pointer">
-                                    View
-                                </Link>
-                            </p>
-
+        <div className="max-w-4xl mx-auto p-8">
+            <h1 className="text-3xl font-bold mb-8">My Recipes</h1>
+            
+            <div className="space-y-4">
+                {recipes?.length === 0 ? (
+                    <p className="text-gray-500 italic">YOU HAVEN'T POSTED ANY RECIPES YET</p>
+                ) : (
+                    recipes?.map((recipe) => (
+                        <div key={recipe.id} className="flex justify-between items-center p-6 bg-white shadow-sm border border-gray-100 rounded-2xl">
+                            <div>
+                                <h2 className="text-xl font-semibold text-gray-800">{recipe.title}</h2>
+                                <p className="text-xs text-gray-400 uppercase tracking-widest mt-1">
+                                    Added {new Date(recipe.created_at).toLocaleDateString()}
+                                </p>
+                            </div>
+                            
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => handleDelete(recipe.id)}
+                                    className="px-4 py-2 text-sm font-bold bg-red-400 hover:cursor-pointer text-white rounded-2xl hover:bg-red-600 transition-colors"
+                                >
+                                    DELETE
+                                </button>
+                            </div>
                         </div>
-                    ))}
-                </div>
-            )}
-
-            {recipes?.length === 0 && !loading && (
-                <p className="text-gray-400 italic">You haven't posted any recipes yet.</p>
-            )}
+                    ))
+                )}
+            </div>
         </div>
     );
 }

@@ -37,6 +37,7 @@ export const useAuth = () => {
 
     const logout = async () => {
         await supabase.auth.signOut();
+        localStorage.removeItem('sb-access-token');
     };
 
     return { user, session, loading, loginWithGoogle, logout };

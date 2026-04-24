@@ -1,9 +1,13 @@
 import { z } from "zod";
 
 export const RecipeSchema = z.object({
-    title: z.string().min(1, { message: "TITLE IS REQUIRED" }),
-    instructions: z.string().min(10, { message: "PROVIDE MORE DETAIL" }),
-    ingredients: z.array(z.string()).min(1, { message: "AT LEAST ONE INGREDIENT" })
+    title: z.string()
+        .trim()
+        .min(3, "Title is too short (min 3 chars)")
+        .max(50, "Title is too long (max 50 chars)"),
+    instructions: z.string()
+        .trim()
+        .min(10, "Instructions are too short (min 10 chars)"),
+    ingredients: z.array(z.string().trim())
+        .min(1, "You need at least one ingredient")
 });
-
-export type RecipeInput = z.infer<typeof RecipeSchema>;

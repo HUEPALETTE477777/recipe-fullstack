@@ -3,16 +3,22 @@ import { supabase } from "../config/supabase.js"
 import { RecipeSchema } from "../schemas/RecipeSchema.js";
 import { AuthRequest } from '../middleware/Auth';
 
+const RECIPE_SELECT_QUERY = `
+    *,
+    profiles (
+        display_name,
+        avatar_url,
+        email
+    )
+`;
+
 export const getAllRecipes = async (req: Request, res: Response) => {
     try {
 
         // JOIN THE TABLE WITH SUPABASE SYNTAX
         const { data, error } = await supabase
             .from('recipes')
-            .select(`
-                *,
-                profiles (display_name, avatar_url)
-            `)
+            .select(RECIPE_SELECT_QUERY)
             .order('created_at', { ascending: false });
 
         if (error) {
@@ -28,11 +34,11 @@ export const getAllRecipes = async (req: Request, res: Response) => {
 
 export const getMyRecipes = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req.user?.id as string; 
+        const userId = req.user?.id as string;
 
         const { data, error } = await supabase
             .from('recipes')
-            .select()
+            .select(RECIPE_SELECT_QUERY)
             .eq('user_id', userId)
             .order('created_at', { ascending: false });
 
@@ -40,7 +46,7 @@ export const getMyRecipes = async (req: AuthRequest, res: Response) => {
             console.error("BULLSHID FETCHING MY RECIPES ERROR", error);
             return res.status(500).json({ error: error.message });
         }
-        
+
         res.status(200).json(data);
     } catch (err: any) {
         res.status(500).json({ error: err.message });
@@ -54,19 +60,12 @@ export const getRecipe = async (req: Request, res: Response) => {
         // JOIN THE TABLE WITH SUPABASE SYNTAX
         const { data: recipe, error: findError } = await supabase
             .from('recipes')
-            .select(`
-                *,
-                profiles (
-                    email,
-                    display_name,
-                    avatar_url
-                )
-            `)
+            .select(RECIPE_SELECT_QUERY)
             .eq('id', id) // SPECIFIC RECIPE
             .single(); // RETURN AN OBJECT INSTEAD OF AN ARRAY
 
         if (findError || !recipe) {
-            return res.status(404).json({ message: "RECIPE NOT FOUND" });
+            return res.status(404).json({ error: "RECIPE NOT FOUND" });
         }
 
         res.status(200).json(recipe);
@@ -86,7 +85,7 @@ export const createRecipe = async (req: AuthRequest, res: Response) => {
     }
 
     if (!req.user) {
-        return res.status(401).json({ message: "UNAUTHORIZED: User not found on request" });
+        return res.status(401).json({ error: "UNAUTHORIZED: USER NOT FOUND ON REQUEST" });
     }
 
     const user_id = req.user.id;
@@ -98,8 +97,8 @@ export const createRecipe = async (req: AuthRequest, res: Response) => {
             .select();
 
         if (error) {
-            console.error("Supabase Insertion Error:", error.message);
-            return res.status(400).json({ message: error.message });
+            console.error("SUPBASE INSERTION ERROR:", error.message);
+            return res.status(400).json({ error: error.message });
         }
 
         res.status(201).json(data[0]);
@@ -116,7 +115,7 @@ export const deleteRecipe = async (req: AuthRequest, res: Response) => {
     try {
         const { data: recipe, error: findError } = await supabase
             .from('recipes')
-            .select()
+            .select(RECIPE_SELECT_QUERY)
             .eq('id', id)
             .single();
 
