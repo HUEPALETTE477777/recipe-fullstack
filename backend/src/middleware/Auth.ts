@@ -24,16 +24,76 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     }
 }
 
+// THIS IS JUICY SINCE I CAN USE FOR ANY ROLE
 export const authorize = (requiredRole: string) => {
-    return (req: Request, res: Response, next: NextFunction) => {
-        const user = (req as any).user;
-        
-        // SUPBASE STORES IT IN user_metadata OR SEPARATE PROFILES TABLE
-        const userRole = user.app_metadata?.role || 'user'; 
+    return async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const userId = req.user?.id;
 
-        if (userRole !== requiredRole) {
-            return res.status(403).json({ message: "FORBIDDEN, UNAUTHORIZED IMMIGRANT" });
+        if (!userId) {
+            return res.status(401).json({ message: "UNAUTHORIZED, NO USER SESSION FOUND" });
         }
-        next();
+
+        try {
+            const { data: profile, error } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', userId)
+                .single();
+
+            if (error || !profile) {
+                return res.status(404).json({ message: "USER PROFILE NOT FOUND" });
+            }
+
+            if (profile.role !== requiredRole) {
+                return res.status(403).json({ message: "FORBIDDEN: ACCESS DENIED" });
+            }
+
+            next();
+        } catch (err) {
+            console.error("Authorization error:", err);
+            return res.status(500).json({ message: "INTERNAL SERVER AUTHORIZATION ERROR" });
+        }
     };
 }
+
+// THIS WILL BE USED IN DELETE/EDIT, SINCE I WANT ADMIN AND OWNER OF RECIPE
+// TO BE ABLE TO MODIFY
+export const canModifyRecipe = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const recipeId = req.params.id as string; 
+
+    if (!userId) return res.status(401).json({ message: "UNAUTHORIZED: LOGIN REQUIRED" });
+    if (!recipeId) return res.status(400).json({ message: "BAD REQUEST: MISSING RECIPE ID" });
+
+    try {
+        const { data: recipe, error: recipeError } = await supabase
+            .from("recipes")
+            .select("user_id") 
+            .eq("id", recipeId)
+            .single();  
+
+        if (recipeError || !recipe) {
+            return res.status(404).json({ message: "RECIPE NOT FOUDN" });
+        }
+
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", userId)
+            .single();
+
+        const isAdmin = profile?.role === "admin";
+        const isOwner = recipe.user_id === userId;
+
+        if (isOwner || isAdmin) {
+            return next(); 
+        }
+
+        // LOCKED OUT NOW
+        return res.status(403).json({ message: "FORBIDDEN: You do not own this recipe" });
+    } catch (err) {
+        console.error("Authorization check failed:", err);
+        return res.status(500).json({ message: "INTERNAL SERVER ERROR DURING AUTH CHECK" });
+    }
+};
+

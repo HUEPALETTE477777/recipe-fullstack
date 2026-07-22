@@ -8,7 +8,7 @@ export const useAuth = () => {
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        // CHEKC FOR ACTIVE SESSIONS AND MOUNT
+        // CHEKC FOR PREVIOUS OR ACTIVE SESSIONS AND MOUNT THAT HAWK TUAH
         supabase.auth.getSession().then(({ data: { session } }) => {
             setSession(session);
             setUser(session?.user ?? null);
@@ -18,7 +18,7 @@ export const useAuth = () => {
             setLoading(false);
         });
 
-        // LISTEN FOR STATE CHANGES
+        // LISTEN FOR AUTH STATE CHANGES
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);

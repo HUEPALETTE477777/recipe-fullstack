@@ -1,19 +1,26 @@
 import { Router } from 'express';
 import { createRecipe, getAllRecipes, getRecipe, getMyRecipes, deleteRecipe } from '../controllers/RecipeController.js';
-import { authenticate, authorize } from '../middleware/Auth';
+import { authenticate, canModifyRecipe } from '../middleware/Auth';
+import multer from 'multer';
+import { validateImageBytes } from '../middleware/ValidateImages.ts';
 
 const router = Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-// PUBLIC FOR JIT NOT LOGGED In
+// STATIC PATHS FIRST
 router.get('/', getAllRecipes);
-router.get('/my-recipes', authenticate, getMyRecipes)
-router.get('/:id', getRecipe)
+router.get('/my-recipes', authenticate, getMyRecipes);
 
-// ONLY FOR LOGGED IN USERS
-router.post('/create-recipe', authenticate, createRecipe);
+router.post('/create-recipe',
+    authenticate,
+    upload.any(),
+    validateImageBytes(["coverImages", "stepImages_"]),
+    createRecipe
+);
 
-// DELETING FOR ADMIN OR OWNER OF RECIPE
-// router.delete('/:id', authenticate, authorize('admin'), deleteRecipe);
-router.delete('/:id', authenticate, deleteRecipe);
+// DYNAMIC PATHS LAST
+router.get('/:id', getRecipe);
+router.delete('/:id', authenticate, canModifyRecipe, deleteRecipe);
 
 export default router;

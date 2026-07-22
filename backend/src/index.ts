@@ -4,7 +4,6 @@ import * as dotenv from 'dotenv';
 import { requestLogger } from "./middleware/Logger.ts";
 
 import recipeRoutes from "./routes/RecipeRoutes.ts"
-
 dotenv.config();
 
 const app = express();

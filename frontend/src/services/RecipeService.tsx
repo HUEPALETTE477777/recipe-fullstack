@@ -22,9 +22,20 @@ export const RecipeService = {
         return response.data;
     },
 
-    // CREATE RECIPE FOR ONLY USERS
-    createRecipe: async (recipeData: { title: string; instructions: string; ingredients: string[] }) => {
-        const response = await api.post('/recipes/create-recipe', recipeData);
+    // CREATE RECIPE FOR ONLY REGISTERED USERS
+    // createRecipe: async (recipeData: { title: string; instructions: string; ingredients: string[] }) => {
+    //     const response = await api.post('/recipes/create-recipe', recipeData);
+    //     return response.data;
+    // },
+
+    // UPDATED TO BE MULTIPART, WITH CREDENTIALS TO PROTECT THAT ROUTE MORE CONDOMS
+    createRecipe: async (formData: FormData) => {
+        const response = await api.post('/recipes/create-recipe', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            withCredentials: true
+        });
         return response.data;
     },
 

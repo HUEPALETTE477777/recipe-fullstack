@@ -3,25 +3,43 @@ import { useState, useEffect } from "react";
 import { RecipeService } from "../../services/RecipeService";
 import { useApi } from "../../hooks/useApi";
 import { type Recipe } from "../../types/RecipeTypes"
+import { useAuth } from "../../hooks/useAuth";
+import HomePageRecipeCarousel from "../../components/HomePageRecipeCarousel";
 
 export default function HomePage() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [inputCurrentPage, setInputCurrentPage] = useState<string>("1")
     const itemsPerPage = 3;
-    const { data: recipes, loading } = useApi(() => RecipeService.getAllRecipes(), []);
+
+    // GRAB THE USER PROFILE STATAE AND AUTH 
+    const { user, session, loading: authLoading } = useAuth();
+    const {
+        data: recipes,
+        loading: recipesLoading,
+    } = useApi(
+        () => RecipeService.getAllRecipes(),
+        [],
+        { enabled: !authLoading }
+    );
 
     useEffect(() => {
         setInputCurrentPage(currentPage.toString());
     }, [currentPage]);
 
-    if (loading) {
-        return <div>Loading...</div>;
+    // KEEP THE LOADING SCREEN IF AUTH STILL INIT OR DATA STILL FLOWING
+    if (authLoading || recipesLoading) {
+        return (
+            <p>Syncing credentials and recipes...</p>
+        );
     }
+
+    const safeRecipes = recipes || [];
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = recipes.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(recipes.length / itemsPerPage);
+    const currentItems = safeRecipes.slice(indexOfFirstItem, indexOfLastItem);
+
+    const totalPages = Math.ceil(safeRecipes.length / itemsPerPage) || 1;
 
     // PAGINATION FUNCTIONS AND CONTROLS
     const prev = () => {
@@ -46,12 +64,14 @@ export default function HomePage() {
     return (
         <div className="min-h-screen bg-gray-100 p-8 flex justify-center items-center">
             <div className="max-w-7xl mx-auto">
-                
+
                 {/* RECIPES GRID 3 COLUMNS */}
                 <div className="grid gap-6 grid-cols-3 mb-12">
-                    {(currentItems || []).map((recipe : Recipe) => (
+
+                    {currentItems.map((recipe: Recipe) => (
                         <div key={recipe.id} className="bg-white text-gray-800 p-10 shadow-sm border rounded-lg border-gray-200 hover:shadow-md transition-shadow flex flex-col">
                             <div>
+                                <HomePageRecipeCarousel urls={recipe.cover_image_urls} />
                                 <div className="flex items-center gap-3 mb-4">
                                     {recipe.profiles?.avatar_url ? (
                                         <img
@@ -89,8 +109,8 @@ export default function HomePage() {
                 {/* PAGINATION CONTROLS  */}
                 <div className="flex justify-center">
                     <div className="flex bg-white px-6 py-3 shadow-sm border border-gray-200 items-center rounded-full gap-10">
-                        <button 
-                            onClick={prev} 
+                        <button
+                            onClick={prev}
                             className="text-gray-600 hover:text-gray-800 font-semibold hover:cursor-pointer transition-colors"
                         >
                             PREVIOUS
@@ -107,8 +127,8 @@ export default function HomePage() {
                             <span className="font-bold text-gray-500">{totalPages || 1}</span>
                         </form>
 
-                        <button 
-                            onClick={next} 
+                        <button
+                            onClick={next}
                             className="text-gray-600 hover:text-gray-800 font-semibold hover:cursor-pointer"
                         >
                             NEXT

@@ -4,11 +4,20 @@ export interface Profile {
     avatar_url: string | null;
 }
 
+export interface RecipeStep {
+    step_number: number;
+    instruction_text: string;
+    step_images?: string[]; 
+}
+
 export interface Recipe {
     id: string;
     title: string;
+    description: string;
     ingredients: string[];
-    instructions: string;
+    cover_image_urls: string[];
+    steps: RecipeStep[]; 
+    instructions?: string; 
     created_at: string;
     profiles?: Profile; 
 }

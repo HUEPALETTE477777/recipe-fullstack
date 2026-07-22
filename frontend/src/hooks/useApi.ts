@@ -1,22 +1,35 @@
 import { useState, useEffect } from 'react';
 
-// SEXY CUSTOM HOOK, GENERIC TYPE + DEPENDENCY
-// PERFECT FOR PAGE LOAD FETCHING OR SESSION FETCHING
-export function useApi<T>(apiFunc: () => Promise<T>, dependencies: any[] = []) {
+
+// FORCED TO ADD A OPTION FLAG SO THE BACKEND API REQUEST
+// WONT CREATE AN ASYNC RACE CONDITION
+
+// 'useAuth' GOES TO TALK TO SUPABASE TO GET AUTH LOGIN SESSION
+// 'useApi' GOES TO TALK TO SUPABASE DATABASE TO GET OTHER DATA
+// THE FLAG WILL LOCK OUT 'useApi' UNTIL 'useAuth' DECIDES TO FINISH INSIDE
+export function useApi<T>(
+    apiFunc: () => Promise<T>, 
+    dependencies: any[] = [], 
+    options?: { enabled?: boolean }
+) {
     const [data, setData] = useState<T | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<any>(null);
 
+    const isEnabled = options?.enabled ?? true;
+
     useEffect(() => {
-        // FLAG WHEN A COMPONENT DIES WHEN USER CLICKS SHID
-        // AND DATA HASNT ARRIVED YET
+        if (!isEnabled) {
+            setLoading(true); 
+            return;
+        }
+
         let isMounted = true;
 
         const execute = async () => {
             try {
                 setLoading(true);
                 const result = await apiFunc();
-                console.log("API RESULT:", result);
                 if (isMounted) {
                     setData(result);
                 }
@@ -33,10 +46,10 @@ export function useApi<T>(apiFunc: () => Promise<T>, dependencies: any[] = []) {
 
         execute();
         return () => { isMounted = false }; 
-    }, dependencies);
+    }, [...dependencies, isEnabled]);
 
-    // USED BY DELETION, MIDDLEGROUND REFACOTR RATHER THAN HAVING AN ENTIRE CONTEXT/REDUX
-    // IT IS A WRAPPER FOR 'setData', WHICH WILL UPDATE THE UI AS IT IS 'useState'
+    // THIS SHID IS ONLY USED IN 'MyRecipes' TO DELETE SHID. TRASH UTILITIY
+    // MAYBE ONE DAY ILL REUSE IT IN OTHER COMPONENTS
     const removeListItem = (id: string | number) => {
         if (Array.isArray(data)) {
             setData(data.filter(item => item.id !== id) as unknown as T);
