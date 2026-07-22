@@ -116,7 +116,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      search_recipes: {
+        Args: { search_query: string }
+        Returns: {
+          cover_image_urls: string[]
+          created_at: string
+          description: string
+          id: string
+          profiles: Json
+          title: string
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

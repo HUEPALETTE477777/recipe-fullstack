@@ -4,8 +4,23 @@ import { RecipeSchema } from "../schemas/RecipeSchema.js";
 import { AuthRequest } from '../middleware/Auth';
 import crypto from "crypto";
 
+// JOIN SYNTAX
+// * => EVERY COLUMN
+//[
+//   {
+//     "id": "recipe-123",
+//     "title": "Grandma's Secret Lasagna",
+//     "description": "The absolute best...",
+//     "cover_image_urls": ["autist.jpg"],
+//     "profiles": {
+//       "display_name": "Chef Dog",
+//       "avatar_url": "dog.jpg",
+//       "email": "dog@gmail.com"
+//     }
+//   }
+// ]
 const RECIPE_SELECT_QUERY = `
-    *,
+    *, 
     profiles (
         display_name,
         avatar_url,
@@ -22,7 +37,6 @@ type AuthMulterRequest = AuthRequest & {
 
 export const getAllRecipes = async (req: Request, res: Response) => {
     try {
-        // JOIN THE TABLE WITH SUPABASE SYNTAX
         const { data, error } = await supabase
             .from('recipes')
             .select(RECIPE_SELECT_QUERY)
@@ -62,9 +76,8 @@ export const getMyRecipes = async (req: AuthRequest, res: Response) => {
 
 export const getRecipe = async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    try {
 
-        // JOIN THE TABLE WITH SUPABASE SYNTAX
+    try {
         const { data: recipe, error: findError } = await supabase
             .from('recipes')
             .select(RECIPE_SELECT_QUERY)
@@ -126,7 +139,6 @@ export const getRecipe = async (req: Request, res: Response) => {
 // ]
 export const createRecipe = async (req: AuthMulterRequest, res: Response) => {
     try {
-        // ALL FORMDATA FROM TEH FRONTEND, CHECK AGAINST TEXT STRINGS
         const incomingIngredients = typeof req.body.ingredients === "string"
             ? JSON.parse(req.body.ingredients)
             : req.body.ingredients;
@@ -189,7 +201,6 @@ export const createRecipe = async (req: AuthMulterRequest, res: Response) => {
             coverImagesUrls.push(publicUrlData.publicUrl);
         }
 
-        // WRITE TO recipes TABLE SINCE WE ARE DONE, BUT NOT DOEN WITH RECIPE STEPS YET
         const { data: newRecipe, error: recipeError } = await supabase
             .from('recipes')
             .insert([{
@@ -277,7 +288,6 @@ export const createRecipe = async (req: AuthMulterRequest, res: Response) => {
 };
 
 // OWNER OF RECIPE OR ADMIN CAN DELETE
-// Note: Security/Access checks are safely handled by the canModifyRecipe middleware!
 export const deleteRecipe = async (req: AuthRequest, res: Response) => {
     const id = req.params.id as string;
 
@@ -298,5 +308,32 @@ export const deleteRecipe = async (req: AuthRequest, res: Response) => {
     } catch (error: any) {
         console.error("SERVER EXCEPTION DURING DELETION:", error.message);
         return res.status(500).json({ error: "INTERNAL SERVER ERROR DURING DELETION" });
+    }
+}
+
+// expecting /search?q=bullshid
+// .rpc() from supabase server (custom sql func) since .or() fcked me for an hour
+export const searchRecipes = async (req: Request, res: Response) => {
+    try {
+        const query = (req.query.q as string || '').trim();
+        if (!query) {
+            return res.status(400).json({ error: "Search query parameter 'q' is required" });
+        }
+        
+        const { data, error } = await supabase
+            .rpc('search_recipes', { 
+                search_query: query // search_query MATCHES supabase name
+            });
+        
+        if (error) {
+            console.error("SUPABASE SEARCH ERROR:", error);
+            return res.status(500).json({ error: error.message });
+        }
+
+
+        res.status(200).json(data);
+    } catch (err: any) {
+        console.error("SERVER SEARCH EXCEPTION:", err.message);
+        res.status(500).json({ error: err.message });
     }
 }

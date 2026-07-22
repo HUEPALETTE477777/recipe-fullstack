@@ -1,6 +1,7 @@
 // SERVICE WILL USE 'api' SO IT WILL CHEKC THE BORING 
 // JWT BULLSHID AND TIMER EXPIRATION
 import api from "../api/axios";
+import type { QueriedRecipe, Recipe } from "../types/RecipeTypes";
 
 export const RecipeService = {
 
@@ -42,6 +43,12 @@ export const RecipeService = {
     // DELETE RECIPE BY ID, MUST BE AUTHORIZED
     deleteRecipeById: async (id: string) => {
         const response = await api.delete(`/recipes/${id}`, { withCredentials: true });
+        return response.data;
+    },
+
+    // STAY CONDOM SAFE encodeURIComponent
+    searchRecipes: async (query: string): Promise<QueriedRecipe[]> => {
+        const response = await api.get<QueriedRecipe[]>(`/recipes/search?q=${encodeURIComponent(query)}`);
         return response.data;
     }
 };

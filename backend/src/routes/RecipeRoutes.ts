@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createRecipe, getAllRecipes, getRecipe, getMyRecipes, deleteRecipe } from '../controllers/RecipeController.js';
+import { createRecipe, getAllRecipes, getRecipe, getMyRecipes, deleteRecipe, searchRecipes } from '../controllers/RecipeController.js';
 import { authenticate, canModifyRecipe } from '../middleware/Auth';
 import multer from 'multer';
 import { validateImageBytes } from '../middleware/ValidateImages.ts';
@@ -11,6 +11,7 @@ const upload = multer({ storage });
 // STATIC PATHS FIRST
 router.get('/', getAllRecipes);
 router.get('/my-recipes', authenticate, getMyRecipes);
+router.get('/search', searchRecipes)
 
 router.post('/create-recipe',
     authenticate,

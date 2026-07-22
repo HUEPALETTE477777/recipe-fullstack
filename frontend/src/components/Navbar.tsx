@@ -1,9 +1,22 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
+import { useState } from 'react';
 
 export default function Navbar() {
     // USE SESSION FOR SPEED + FRONTEND, NO VALIDATIOn
     const { session, logout } = useAuth();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const [searchInput, setSearchInput] = useState(searchParams.get("q") || "");
+
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchInput.trim()) {
+            navigate(`/?q=${encodeURIComponent(searchInput.trim())}`);
+        } else {
+            navigate('/');
+        }
+    };
 
     return (
         <div className="bg-amber-300">
@@ -20,6 +33,17 @@ export default function Navbar() {
                         MY RECIPES
                     </Link>
                 </div>
+
+                {/* MIDDLE SEARCH BAR */}
+                <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md mx-4">
+                    <input 
+                        type="text"
+                        placeholder="Search recipes or authors..."
+                        value={searchInput}
+                        onChange={(evt) => setSearchInput(evt.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none bg-white text-gray-800"
+                    />
+                </form>
 
                 {/* RIGHT SIDE OF NAVBAR */}
                 <div className="flex gap-6 items-center">
