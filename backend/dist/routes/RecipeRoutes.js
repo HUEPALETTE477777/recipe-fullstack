@@ -3,25 +3,16 @@ import { createRecipe, getAllRecipes, getRecipe, getMyRecipes, deleteRecipe, sea
 import { authenticate, canModifyRecipe } from '../middleware/Auth.js';
 import multer from 'multer';
 import { validateImageBytes } from '../middleware/ValidateImages.js';
-
 const router = Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
 // STATIC PATHS FIRST
 router.get('/', getAllRecipes);
 router.get('/my-recipes', authenticate, getMyRecipes);
-router.get('/search', searchRecipes)
-
-router.post('/create-recipe',
-    authenticate,
-    upload.any(),
-    validateImageBytes(["coverImages", "stepImages_"]),
-    createRecipe
-);
-
+router.get('/search', searchRecipes);
+router.post('/create-recipe', authenticate, upload.any(), validateImageBytes(["coverImages", "stepImages_"]), createRecipe);
 // DYNAMIC PATHS LAST
 router.get('/:id', getRecipe);
 router.delete('/:id', authenticate, canModifyRecipe, deleteRecipe);
-
 export default router;
+//# sourceMappingURL=RecipeRoutes.js.map

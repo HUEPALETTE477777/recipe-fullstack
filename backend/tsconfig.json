@@ -40,7 +40,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "allowImportingTsExtensions": true,
-    "emitDeclarationOnly": true
+    "allowImportingTsExtensions": false,
+    "moduleResolution": "bundler"
   }
 }
