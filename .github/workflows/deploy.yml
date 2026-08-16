@@ -1,0 +1,5 @@
+name: BUILD, TEST, AND DEPLOY TO RENDER
+
+on:
+  push:
+    branches: [main]
