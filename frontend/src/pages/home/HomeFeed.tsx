@@ -3,8 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { RecipeService } from "../../services/RecipeService";
 import { useApi } from "../../hooks/useApi";
-// 1. Import QueriedRecipe along with Recipe
-import { type Recipe, type QueriedRecipe } from "../../types/RecipeTypes";
+
+import { type QueriedRecipe } from "../../types/RecipeTypes";
 import { useAuth } from "../../hooks/useAuth";
 import HomePageRecipeCarousel from "../../components/HomePageRecipeCarousel";
 
@@ -17,7 +17,7 @@ export default function HomeFeed() {
     const itemsPerPage = 3;
 
     // GRAB THE USER PROFILE STATE AND AUTH 
-    const { user, session, loading: authLoading } = useAuth();
+    const { loading: authLoading } = useAuth();
 
     const {
         data: recipes,

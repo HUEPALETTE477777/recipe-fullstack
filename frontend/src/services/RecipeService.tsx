@@ -1,7 +1,7 @@
 // SERVICE WILL USE 'api' SO IT WILL CHEKC THE BORING 
 // JWT BULLSHID AND TIMER EXPIRATION
 import api from "../api/axios";
-import type { QueriedRecipe, Recipe } from "../types/RecipeTypes";
+import type { QueriedRecipe } from "../types/RecipeTypes";
 
 export const RecipeService = {
 
