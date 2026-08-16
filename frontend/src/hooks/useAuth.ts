@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/SupabaseClient';
 import type { User, Session } from '@supabase/supabase-js';
 
+// 'useAuth' GOES TO TALK TO SUPABASE TO GET AUTH LOGIN SESSION
 export const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
     const [session, setSession] = useState<Session | null>(null);

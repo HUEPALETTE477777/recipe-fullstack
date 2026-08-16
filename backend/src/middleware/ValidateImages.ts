@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
+const fileType = await import("file-type");
 
 export const validateImageBytes = (fileFields: string[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const fileTypeModule = await import("file-type");
-            const fileTypeFromBuffer = fileTypeModule.fileTypeFromBuffer || (fileTypeModule as any).default?.fileTypeFromBuffer;
+            const fileTypeFromBuffer = fileType.fileTypeFromBuffer || (fileType as any).default?.fileTypeFromBuffer;
 
             if (!fileTypeFromBuffer) {
                 throw new Error("Unable to load fileTypeFromBuffer from file-type package.");

@@ -1,6 +1,7 @@
 import { RecipeService } from "../../services/RecipeService";
 import { useApi } from "../../hooks/useApi";
 import { type Recipe } from "../../types/RecipeTypes";
+import { Link } from "react-router-dom";
 
 // 'useApi' DOES THE INITIAL FETCH, RENAME DATA TO RECIPES
 export default function MyRecipes() {
@@ -50,6 +51,12 @@ export default function MyRecipes() {
                                 >
                                     DELETE
                                 </button>
+                                <Link 
+                                    to={`/recipe/${recipe.id}`}
+                                    className="px-4 py-2 text-sm font-bold bg-gray-400 hover:cursor-pointer text-white rounded-2xl hover:bg-red-600 transition-colors"
+                                >
+                                    VIEW
+                                </Link>
                             </div>
                         </div>
                     ))

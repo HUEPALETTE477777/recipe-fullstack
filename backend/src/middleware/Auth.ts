@@ -10,7 +10,6 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
     const token = header?.split(' ')[1];
 
     try {
-        // ASK SUPABASE TO VERIFY THE JWT TOKEN SENT FROM FRONTEND
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
         if (error || !user) {
