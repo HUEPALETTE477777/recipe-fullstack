@@ -5,7 +5,7 @@ import type { QueriedRecipe } from "../types/RecipeTypes";
 
 export const RecipeService = {
 
-    // GET ALL RECIPES
+    // GET ALL RECIPESm
     getAllRecipes: async () => {
         const response = await api.get('/recipes');
         return response.data;
