@@ -29,14 +29,16 @@ export default function Navbar() {
                     <Link to="/create" className=" hover:text-violet-600">
                         CREATE RECIPE
                     </Link>
-                    <Link to="/my-recipes" className=" hover:text-violet-600">
-                        MY RECIPES
-                    </Link>
+                    {session?.user && (
+                        <Link to="/my-recipes" className="...">
+                            My Recipes
+                        </Link>
+                    )}
                 </div>
 
                 {/* MIDDLE SEARCH BAR */}
                 <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md mx-4">
-                    <input 
+                    <input
                         type="text"
                         placeholder="Search recipes or authors..."
                         value={searchInput}
