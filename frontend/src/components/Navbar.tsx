@@ -3,11 +3,12 @@ import { useAuth } from '../hooks/useAuth'
 import { useState } from 'react';
 
 export default function Navbar() {
-    // USE SESSION FOR SPEED + FRONTEND, NO VALIDATIOn
-    const { session, logout } = useAuth();
+    const { session, user, loading, logout } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [searchInput, setSearchInput] = useState(searchParams.get("q") || "");
+
+    const isAuthenticated = Boolean(user || session?.user);
 
     const handleSearchSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,13 +27,16 @@ export default function Navbar() {
                     <Link to="/" className="hover:text-violet-600">
                         HOME
                     </Link>
-                    <Link to="/create" className=" hover:text-violet-600">
-                        CREATE RECIPE
-                    </Link>
-                    {session?.user && (
-                        <Link to="/my-recipes" className="...">
-                            My Recipes
-                        </Link>
+                    
+                    {!loading && isAuthenticated && (
+                        <>
+                            <Link to="/create" className="hover:text-violet-600">
+                                CREATE RECIPE
+                            </Link>
+                            <Link to="/my-recipes" className="hover:text-violet-600">
+                                MY RECIPES
+                            </Link>
+                        </>
                     )}
                 </div>
 
@@ -49,19 +53,27 @@ export default function Navbar() {
 
                 {/* RIGHT SIDE OF NAVBAR */}
                 <div className="flex gap-6 items-center">
-                    {session ? (
+                    {loading ? (
+                        <span className="text-gray-400 text-sm">...</span>
+                    ) : isAuthenticated && session?.user ? (
                         <>
-                            <span>{session.user.user_metadata.full_name}</span>
-                            <img src={session.user.user_metadata.picture || session.user.user_metadata.avatar_url} className="w-8 h-8 rounded-full" />
-                            {/* <span>{session.user.email}</span> */}
-                            <button onClick={logout}
-                                className="hover:cursor-pointer bg-red-400 text-white"
+                            <span>{session.user.user_metadata?.full_name || session.user.email}</span>
+                            {(session.user.user_metadata?.picture || session.user.user_metadata?.avatar_url) && (
+                                <img 
+                                    src={session.user.user_metadata.picture || session.user.user_metadata.avatar_url} 
+                                    className="w-8 h-8 rounded-full" 
+                                    alt="profile"
+                                />
+                            )}
+                            <button 
+                                onClick={logout}
+                                className="hover:cursor-pointer bg-red-400 text-white px-3 py-1 rounded"
                             >
                                 Logout
                             </button>
                         </>
                     ) : (
-                        <Link to="/login">Login</Link>
+                        <Link to="/login" className="hover:text-violet-600">Login</Link>
                     )}
                 </div>
             </div>
