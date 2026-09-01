@@ -5,6 +5,7 @@ import { requestLogger } from "./middleware/Logger.js";
 import recipeRoutes from "./routes/RecipeRoutes.js";
 dotenv.config();
 const app = express();
+
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true,
