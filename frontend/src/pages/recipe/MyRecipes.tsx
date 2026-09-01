@@ -2,6 +2,9 @@ import { RecipeService } from "../../services/RecipeService";
 import { useApi } from "../../hooks/useApi";
 import { type Recipe } from "../../types/RecipeTypes";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 // 'useApi' DOES THE INITIAL FETCH, RENAME DATA TO RECIPES
 export default function MyRecipes() {
@@ -9,6 +12,19 @@ export default function MyRecipes() {
         () => RecipeService.getMyRecipes(), 
         []
     );
+
+    const { user, loading: authLoading } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            navigate("/login");
+        }
+    }, [user, authLoading, navigate])
+    
+    if (authLoading || !user) {
+        return <p className="p-8 text-center text-gray-500">Checking credentials...</p>;
+    }
 
     const handleDelete = async (id: string) => {
         if (!window.confirm("Delete this?")) {

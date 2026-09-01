@@ -14,7 +14,6 @@ router.get('/my-recipes', authenticate, getMyRecipes);
 router.get('/search', searchRecipes)
 
 router.post('/create-recipe',
-    authenticate,
     upload.any(),
     validateImageBytes(["coverImages", "stepImages_"]),
     createRecipe

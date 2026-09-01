@@ -27,16 +27,15 @@ export default function Navbar() {
                     <Link to="/" className="hover:text-violet-600">
                         HOME
                     </Link>
-                    
+                    <Link to="/create" className="hover:text-violet-600">
+                        CREATE RECIPE
+                    </Link>
+
+                    {/* ONLY VISIBLE TO LOGGED-IN USERS */}
                     {!loading && isAuthenticated && (
-                        <>
-                            <Link to="/create" className="hover:text-violet-600">
-                                CREATE RECIPE
-                            </Link>
-                            <Link to="/my-recipes" className="hover:text-violet-600">
-                                MY RECIPES
-                            </Link>
-                        </>
+                        <Link to="/my-recipes" className="hover:text-violet-600">
+                            MY RECIPES
+                        </Link>
                     )}
                 </div>
 

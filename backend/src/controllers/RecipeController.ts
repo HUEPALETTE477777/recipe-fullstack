@@ -160,10 +160,7 @@ export const createRecipe = async (req: AuthMulterRequest, res: Response) => {
             });
         }
 
-        if (!req.user?.id) {
-            return res.status(401).json({ error: "UNAUTHORIZED: USER ID NOT FOUND ON REQUEST" });
-        }
-        const user_id = req.user.id;
+        const user_id = req.user?.id || null;
 
         // USING UPLOAD.any(), WHERE IT IS A FLAT ARRAY OF FILES 
         // https://stackoverflow.com/questions/56491896/using-multer-and-express-with-typescript
