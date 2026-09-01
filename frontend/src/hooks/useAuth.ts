@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/SupabaseClient';
 import type { User, Session } from '@supabase/supabase-js';
 
+const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+
 // 'useAuth' GOES TO TALK TO SUPABASE TO GET AUTH LOGIN SESSION
 export const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -32,7 +34,7 @@ export const useAuth = () => {
     const loginWithGoogle = async () => {
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin }
+            options: { redirectTo: siteUrl }
         });
     };
 
