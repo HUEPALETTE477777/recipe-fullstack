@@ -95,4 +95,3 @@ export const canModifyRecipe = async (req: AuthRequest, res: Response, next: Nex
         return res.status(500).json({ message: "INTERNAL SERVER ERROR DURING AUTH CHECK" });
     }
 };
-

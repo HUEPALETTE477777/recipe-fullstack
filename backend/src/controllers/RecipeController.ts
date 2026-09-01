@@ -159,8 +159,8 @@ export const createRecipe = async (req: AuthMulterRequest, res: Response) => {
                 errors: result.error.flatten().fieldErrors
             });
         }
-
-        const user_id = req.user?.id || null;
+        
+        const user_id = req.user.id;
 
         // USING UPLOAD.any(), WHERE IT IS A FLAT ARRAY OF FILES 
         // https://stackoverflow.com/questions/56491896/using-multer-and-express-with-typescript
@@ -273,7 +273,7 @@ export const createRecipe = async (req: AuthMulterRequest, res: Response) => {
             if (stepsError) {
                 console.error("STEPS BULK INSERT ERROR:", stepsError.message);
                 await supabase.from('recipes').delete().eq('id', newRecipe.id);
-                return res.status(400).json({ error: "Failed to create recipe steps metadata." });
+                return res.status(400).json({ error: "Failed to create recipe steps metadata" });
             }
         }
 

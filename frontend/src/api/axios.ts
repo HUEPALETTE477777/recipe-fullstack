@@ -18,6 +18,8 @@ api.interceptors.request.use(async (config) => {
 
     if (session?.access_token) {
         config.headers.Authorization = `Bearer ${session.access_token}`;
+    } else {
+        delete config.headers.Authorization; 
     }
 
     return config;
@@ -34,7 +36,11 @@ api.interceptors.response.use(
     async (error) => {
         // CHECK IF WE ARE UNAUTHORIZED
         if (error.response?.status === 401) {
-            alert("SESSION EXPIRED OR INVALID. LOGGING YOU OUT");
+            const hasToken = error.config.headers?.Authorization;
+            if (hasToken) {
+                alert("SESSION EXPIRED OR INVALID. LOGGING YOU OUT");
+                window.location.href = '/login';
+            }
 
             await supabase.auth.signOut();
             localStorage.removeItem('sb-access-token');

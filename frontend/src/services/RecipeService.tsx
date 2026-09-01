@@ -31,12 +31,7 @@ export const RecipeService = {
 
     // UPDATED TO BE MULTIPART, WITH CREDENTIALS TO PROTECT THAT ROUTE MORE CONDOMS
     createRecipe: async (formData: FormData) => {
-        const response = await api.post('/recipes/create-recipe', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-            withCredentials: true
-        });
+        const response = await api.post('/recipes/create-recipe', formData);
         return response.data;
     },
 

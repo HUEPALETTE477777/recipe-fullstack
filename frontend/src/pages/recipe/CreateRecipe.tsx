@@ -167,7 +167,7 @@ export default function CreateRecipe() {
             });
 
             await RecipeService.createRecipe(formData);
-            navigate('/my-recipes');
+            navigate('/');
         } catch (err) {
             console.error("FAILED TO SAVE THE RECIPE", err);
         }

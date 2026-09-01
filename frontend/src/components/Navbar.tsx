@@ -27,15 +27,17 @@ export default function Navbar() {
                     <Link to="/" className="hover:text-violet-600">
                         HOME
                     </Link>
-                    <Link to="/create" className="hover:text-violet-600">
-                        CREATE RECIPE
-                    </Link>
 
                     {/* ONLY VISIBLE TO LOGGED-IN USERS */}
                     {!loading && isAuthenticated && (
+                        <>
+                        <Link to="/create" className="hover:text-violet-600">
+                            CREATE RECIPE
+                        </Link>
                         <Link to="/my-recipes" className="hover:text-violet-600">
                             MY RECIPES
                         </Link>
+                        </>
                     )}
                 </div>
 
@@ -58,13 +60,13 @@ export default function Navbar() {
                         <>
                             <span>{session.user.user_metadata?.full_name || session.user.email}</span>
                             {(session.user.user_metadata?.picture || session.user.user_metadata?.avatar_url) && (
-                                <img 
-                                    src={session.user.user_metadata.picture || session.user.user_metadata.avatar_url} 
-                                    className="w-8 h-8 rounded-full" 
+                                <img
+                                    src={session.user.user_metadata.picture || session.user.user_metadata.avatar_url}
+                                    className="w-8 h-8 rounded-full"
                                     alt="profile"
                                 />
                             )}
-                            <button 
+                            <button
                                 onClick={logout}
                                 className="hover:cursor-pointer bg-red-400 text-white px-3 py-1 rounded"
                             >
