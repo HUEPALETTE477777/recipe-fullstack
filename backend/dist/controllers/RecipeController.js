@@ -1,5 +1,6 @@
 import { supabase } from "../config/supabase.js";
-import { RecipeSchema } from "../schemas/RecipeSchema.js";
+import { RecipeSchema, AiRecipeSchema } from "../schemas/RecipeSchema.js";
+import { ai } from "../config/gemini.js";
 import crypto from "crypto";
 // JOIN SYNTAX
 // * => EVERY COLUMN
@@ -129,13 +130,17 @@ export const createRecipe = async (req, res) => {
         const result = RecipeSchema.safeParse({
             title: req.body.title,
             ingredients: incomingIngredients,
-            description: req.body.description
+            description: req.body.description,
+            steps: incomingSteps, // Need to separate this shid since steps are a separate table 
         });
         if (!result.success) {
             return res.status(400).json({
                 message: "VALIDATION ERROR",
                 errors: result.error.flatten().fieldErrors
             });
+        }
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: "Unauthorized: You must be logged in to create a recipe" });
         }
         const user_id = req.user.id;
         // USING UPLOAD.any(), WHERE IT IS A FLAT ARRAY OF FILES 
@@ -165,10 +170,11 @@ export const createRecipe = async (req, res) => {
                 .getPublicUrl(`covers/${uniqueFilename}`);
             coverImagesUrls.push(publicUrlData.publicUrl);
         }
+        const { steps, ...recipeDbData } = result.data; // separated here
         const { data: newRecipe, error: recipeError } = await supabase
             .from('recipes')
             .insert([{
-                ...result.data,
+                ...recipeDbData,
                 user_id,
                 cover_image_urls: coverImagesUrls
             }])
@@ -206,9 +212,7 @@ export const createRecipe = async (req, res) => {
                 if (stepUploadError) {
                     throw stepUploadError;
                 }
-                const { data: stepUrlData } = supabase.storage
-                    .from("recipe-images")
-                    .getPublicUrl(`steps/${uniqueFilename}`);
+                const { data: stepUrlData } = supabase.storage.from("recipe-images").getPublicUrl(`steps/${uniqueFilename}`);
                 stepImagesUrls.push(stepUrlData.publicUrl);
             }
             // PUSH FOR EVERY ITERATION/STEP
@@ -278,6 +282,71 @@ export const searchRecipes = async (req, res) => {
     catch (err) {
         console.error("SERVER SEARCH EXCEPTION:", err.message);
         res.status(500).json({ error: err.message });
+    }
+};
+async function fetchFreeStepImage(query) {
+    try {
+        const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+        if (!accessKey) {
+            console.warn("UNSPLASH_ACCESS_KEY is missing in environment variables.");
+            return null;
+        }
+        const response = await fetch(`https://api.unsplash.com/search/photos?page=1&per_page=1&query=${encodeURIComponent(query)}&orientation=landscape`, {
+            headers: {
+                Authorization: `Client-ID ${accessKey}`,
+            },
+        });
+        if (!response.ok) {
+            console.warn(`Unsplash API error: ${response.statusText}`);
+            return null;
+        }
+        const data = await response.json();
+        return data.results?.[0]?.urls?.regular || null;
+    }
+    catch (err) {
+        console.warn("Failed to fetch image from Unsplash:", err.message);
+        return null;
+    }
+}
+export const generateAiRecipe = async (req, res) => {
+    try {
+        const { prompt } = req.body;
+        if (!prompt) {
+            return res.status(400).json({ error: "No prompt found" });
+        }
+        const response = await ai.models.generateContent({
+            model: "gemini-3.1-flash-lite",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: AiRecipeSchema,
+            },
+        });
+        const outputText = response.text;
+        if (!outputText) {
+            return res.status(500).json({ error: "No output received from AI" });
+        }
+        const rawJson = JSON.parse(outputText);
+        const stepsWithImages = await Promise.all(rawJson.steps.map(async (step, index) => {
+            const imageQuery = `${rawJson.title} food ${step.instruction_text.split(" ").slice(0, 4).join(" ")}`;
+            const imageUrl = await fetchFreeStepImage(imageQuery);
+            return {
+                step_number: step.step_number || index + 1,
+                instruction_text: step.instruction_text,
+                step_images: imageUrl ? [imageUrl] : [],
+            };
+        }));
+        const normalizedRecipe = RecipeSchema.parse({
+            ...rawJson,
+            steps: stepsWithImages,
+        });
+        return res.status(200).json({
+            data: normalizedRecipe,
+        });
+    }
+    catch (err) {
+        console.error("AI RECIPE GENERATION FAILED: ", err.message);
+        return res.status(500).json({ error: err.message });
     }
 };
 //# sourceMappingURL=RecipeController.js.map

@@ -3,6 +3,7 @@ import MainLayout from '../layouts/MainLayout';
 import HomeFeed from '../pages/home/HomeFeed'
 import RecipeDetails from '../pages/recipe/RecipeDetails';
 import CreateRecipe from '../pages/recipe/CreateRecipe';
+import GenerateRecipe from '../pages/recipe/GenerateRecipe';
 import Login from '../pages/auth/Login';
 import MyRecipes from '../pages/recipe/MyRecipes';
 
@@ -20,8 +21,12 @@ export const router = createBrowserRouter([
                 element: <RecipeDetails />,
             },
             {
-                path: 'create',
+                path: 'create-recipe',
                 element: <CreateRecipe />,
+            },
+            {
+                path: 'generate-recipe',
+                element: <GenerateRecipe />,
             },
             {
                 path: 'login',

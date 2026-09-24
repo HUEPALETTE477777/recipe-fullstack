@@ -11,5 +11,6 @@ export declare const getRecipe: (req: Request, res: Response) => Promise<Respons
 export declare const createRecipe: (req: AuthMulterRequest, res: Response) => Promise<Response<any, Record<string, any>> | undefined>;
 export declare const deleteRecipe: (req: AuthRequest, res: Response) => Promise<Response<any, Record<string, any>>>;
 export declare const searchRecipes: (req: Request, res: Response) => Promise<Response<any, Record<string, any>> | undefined>;
+export declare const generateAiRecipe: (req: Request, res: Response) => Promise<Response<any, Record<string, any>>>;
 export {};
 //# sourceMappingURL=RecipeController.d.ts.map

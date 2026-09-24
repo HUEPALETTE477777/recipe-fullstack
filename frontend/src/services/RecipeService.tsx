@@ -1,7 +1,7 @@
 // SERVICE WILL USE 'api' SO IT WILL CHEKC THE BORING 
 // JWT BULLSHID AND TIMER EXPIRATION
 import api from "../api/axios";
-import type { QueriedRecipe } from "../types/RecipeTypes";
+import type { QueriedRecipe, Recipe } from "../types/RecipeTypes";
 
 export const RecipeService = {
 
@@ -32,6 +32,11 @@ export const RecipeService = {
     // UPDATED TO BE MULTIPART, WITH CREDENTIALS TO PROTECT THAT ROUTE MORE CONDOMS
     createRecipe: async (formData: FormData) => {
         const response = await api.post('/recipes/create-recipe', formData);
+        return response.data;
+    },
+
+    generateAiRecipe: async (prompt: string): Promise<{ data: Recipe }> => {
+        const response = await api.post('/recipes/generate-ai-recipe', { prompt });
         return response.data;
     },
 

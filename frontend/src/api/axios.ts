@@ -43,17 +43,7 @@ api.interceptors.response.use(
             }
 
             await supabase.auth.signOut();
-            localStorage.removeItem('sb-access-token');
-
-            if (window.location.pathname !== '/login') {
-                window.location.href = '/login';
-            }
         }
-
-        if (error.response?.status === 403) {
-            alert("ACCESS DENIED: NO PERMISSION TO MODIFY THIS RESOURCe");
-        }
-
         return Promise.reject(error);
     }
 )

@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/SupabaseClient';
 import type { User, Session } from '@supabase/supabase-js';
 
-const siteUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
-
 // 'useAuth' GOES TO TALK TO SUPABASE TO GET AUTH LOGIN SESSION
 export const useAuth = () => {
     const [user, setUser] = useState<User | null>(null);
@@ -17,14 +15,20 @@ export const useAuth = () => {
             setUser(session?.user ?? null);
 
             // console.log(session?.access_token ?? null)
-
             setLoading(false);
         });
 
-        // LISTEN FOR AUTH STATE CHANGES
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
             setSession(session);
             setUser(session?.user ?? null);
+
+            if (session?.user) {
+                const googleAvatar = session.user.user_metadata?.avatar_url;
+                if (googleAvatar) {
+                    await supabase.from('profiles').update({ avatar_url: googleAvatar }).eq('id', session.user.id);
+                }
+            }
+
             setLoading(false);
         });
 
@@ -32,9 +36,12 @@ export const useAuth = () => {
     }, []) // EMPTY DEPENDENCY ARRAY RUN ONCe
 
     const loginWithGoogle = async () => {
+        const currentOrigin = window.location.origin;
         await supabase.auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: siteUrl }
+            options: {
+                redirectTo: `${currentOrigin}/`
+            }
         });
     };
 

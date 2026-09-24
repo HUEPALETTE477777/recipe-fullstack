@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createRecipe, getAllRecipes, getRecipe, getMyRecipes, deleteRecipe, searchRecipes } from '../controllers/RecipeController.js';
+import { createRecipe, getAllRecipes, getRecipe, getMyRecipes, deleteRecipe, searchRecipes, generateAiRecipe } from '../controllers/RecipeController.js';
 import { authenticate, canModifyRecipe } from '../middleware/Auth.js';
 import multer from 'multer';
 import { validateImageBytes } from '../middleware/ValidateImages.js';
@@ -19,6 +19,8 @@ router.post('/create-recipe',
     validateImageBytes(["coverImages", "stepImages_"]),
     createRecipe
 );
+
+router.post('/generate-ai-recipe', authenticate, generateAiRecipe);
 
 // DYNAMIC PATHS LAST
 router.get('/:id', getRecipe);
